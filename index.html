@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Wall of Kindness - Valentine</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background: #FB6F92;
+  min-height: 100vh;
+  color: white;
+  text-align: center;
+}
+
+.container {
+  padding: 20px;
+  max-width: 700px;
+  margin: auto;
+}
+
+h1 { font-size: 2.3rem; }
+
+.subtitle {
+  margin-bottom: 15px;
+  opacity: 0.95;
+}
+
+.about {
+  background: rgba(255,255,255,0.25);
+  padding: 15px;
+  border-radius: 15px;
+  margin-bottom: 25px;
+  font-size: 0.95rem;
+}
+
+form {
+  background: rgba(255,255,255,0.2);
+  padding: 20px;
+  border-radius: 18px;
+  margin-bottom: 30px;
+}
+
+input, textarea {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  border-radius: 10px;
+  border: none;
+}
+
+textarea { height: 90px; }
+
+button {
+  background: #ff4f7b;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 25px;
+  cursor: pointer;
+}
+
+.wall {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px,1fr));
+  gap: 12px;
+}
+
+.card {
+  background: rgba(255,255,255,0.3);
+  border-radius: 15px;
+  padding: 12px;
+  font-size: 0.85rem;
+}
+
+.footer {
+  font-size: 0.8rem;
+  margin-top: 20px;
+  opacity: 0.85;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+<h1>Wall of Kindness</h1>
+<div class="subtitle">Sebarkan kebaikan hari ini</div>
+
+<div class="about">
+Valentine bukan cuma soal hadiah — tapi berbagi kebaikan dan bikin hari orang lain lebih hangat.
+</div>
+
+<form id="messageForm">
+<input type="text" id="to" placeholder="Untuk siapa?" required>
+<textarea id="message" placeholder="Tulis pesan baik..." required></textarea>
+<input type="text" id="from" placeholder="Dari siapa? (opsional)">
+<button type="submit">Kirim Pesan</button>
+</form>
+
+<div class="wall" id="wall"></div>
+
+<div class="footer">Wall of Kindness</div>
+</div>
+
+<script>
+const API_URL = ""; // isi nanti dengan link Google Apps Script
+
+const form = document.getElementById("messageForm");
+const wall = document.getElementById("wall");
+
+async function loadMessages() {
+  if (!API_URL) return;
+
+  try {
+    const res = await fetch(API_URL);
+    const data = await res.json();
+
+    wall.innerHTML = "";
+
+    data.reverse().forEach(msg => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <strong>Untuk: ${msg.to}</strong><br>
+        ${msg.message}<br><br>
+        <em>- ${msg.from || "Anonim"}</em>
+      `;
+      wall.appendChild(card);
+    });
+
+  } catch (err) {
+    console.log("Gagal load pesan");
+  }
+}
+
+form.addEventListener("submit", async e => {
+  e.preventDefault();
+
+  if (!API_URL) {
+    alert("Belum terhubung database");
+    return;
+  }
+
+  const data = {
+    to: to.value,
+    message: message.value,
+    from: from.value
+  };
+
+  await fetch(API_URL, {
+    method: "POST",
+    body: JSON.stringify(data),
+    headers: {"Content-Type":"application/json"}
+  });
+
+  form.reset();
+  loadMessages();
+  alert("Pesan terkirim!");
+});
+
+loadMessages();
+</script>
+
+</body>
+</html>
